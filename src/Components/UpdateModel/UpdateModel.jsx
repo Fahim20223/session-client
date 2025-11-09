@@ -16,7 +16,7 @@ const UpdateModel = () => {
       thumbnail: e.target.thumbnail.value,
     };
 
-    fetch(`http://localhost:5000/models/${model._id}`, {
+    fetch(`https://3d-models-server-chi.vercel.app/models/${model._id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",

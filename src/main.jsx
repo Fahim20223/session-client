@@ -13,6 +13,10 @@ import Register from "./Auth/Register.jsx";
 import AuthProvider from "./Context/AuthProvidr.jsx";
 import ModelDetails from "./Components/ModelDetails/ModelDetails.jsx";
 import UpdateModel from "./Components/UpdateModel/UpdateModel.jsx";
+import PrivateRoute from "./Routes/PrivateRoute.jsx";
+import MyModels from "./Components/MyModels/MyModels.jsx";
+import MyDownloads from "./Components/MyDownloads/MyDownloads.jsx";
+// import MyModels from "./Components/MyModels/MyModels.jsx";
 
 const router = createBrowserRouter([
   {
@@ -22,10 +26,12 @@ const router = createBrowserRouter([
       {
         index: true,
         Component: Home,
+        loader: () =>
+          fetch("https://3d-models-server-chi.vercel.app/latest-models"),
       },
       {
         path: "/all-models",
-        loader: () => fetch("http://localhost:5000/models"),
+        loader: () => fetch("https://3d-models-server-chi.vercel.app/models"),
         element: <AllModels></AllModels>,
       },
       {
@@ -43,15 +49,38 @@ const router = createBrowserRouter([
       },
       {
         path: "/model-details/:id",
-        loader: ({ params }) =>
-          fetch(`http://localhost:5000/models/${params.id}`),
-        element: <ModelDetails></ModelDetails>,
+
+        element: (
+          <PrivateRoute>
+            <ModelDetails></ModelDetails>
+          </PrivateRoute>
+        ),
       },
       {
         path: "/update-model/:id",
         loader: ({ params }) =>
-          fetch(`http://localhost:5000/models/${params.id}`),
-        element: <UpdateModel></UpdateModel>,
+          fetch(`https://3d-models-server-chi.vercel.app/models/${params.id}`),
+        element: (
+          <PrivateRoute>
+            <UpdateModel></UpdateModel>
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "/my-models",
+        element: (
+          <PrivateRoute>
+            <MyModels></MyModels>
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "/my-downloads",
+        element: (
+          <PrivateRoute>
+            <MyDownloads></MyDownloads>
+          </PrivateRoute>
+        ),
       },
     ],
   },

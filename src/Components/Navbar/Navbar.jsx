@@ -1,9 +1,19 @@
-import React, { use } from "react";
+import React, { use, useEffect, useState } from "react";
 import { NavLink } from "react-router";
 import { AuthContext } from "../../Context/AuthContext";
 
 const Navbar = () => {
   const { user, signOutUser } = use(AuthContext);
+  const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
+  useEffect(() => {
+    const html = document.querySelector("html");
+    html.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+  const handleTheme = (checked) => {
+    // console.log(checked);
+    setTheme(checked ? "dark" : "light");
+  };
   const links = (
     <>
       <li>
@@ -15,6 +25,17 @@ const Navbar = () => {
       <li>
         <NavLink to={"/add-models"}>Add Model</NavLink>
       </li>
+      {user &&
+        ((
+          <li>
+            <NavLink to="/my-models">My Models</NavLink>
+          </li>
+        ),
+        (
+          <li>
+            <NavLink to="/my-downloads">My Downloads</NavLink>
+          </li>
+        ))}
     </>
   );
   return (
@@ -51,6 +72,23 @@ const Navbar = () => {
         <ul className="menu menu-horizontal px-1">{links}</ul>
       </div>
       <div className="navbar-end">
+        <input
+          onChange={(e) => handleTheme(e.target.checked)}
+          type="checkbox"
+          defaultChecked={localStorage.getItem("theme") === "dark"}
+          className="toggle"
+        />
+
+        {user ? (
+          <img
+            className="w-13 h-13 rounded-full object-cover mr-2"
+            src={user.photoURL}
+            alt=""
+            srcset=""
+          />
+        ) : (
+          ""
+        )}
         {user ? (
           <button className="btn" onClick={signOutUser}>
             LogOut

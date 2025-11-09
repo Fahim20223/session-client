@@ -1,5 +1,6 @@
 import { use } from "react";
 import { AuthContext } from "../../Context/AuthContext";
+import Swal from "sweetalert2";
 
 const AddModels = () => {
   const { user } = use(AuthContext);
@@ -15,7 +16,7 @@ const AddModels = () => {
       downloads: 0,
       created_by: user.email,
     };
-    fetch("http://localhost:5000/models", {
+    fetch("https://3d-models-server-chi.vercel.app/models", {
       method: "POST",
       headers: {
         "content-type": "application/json",
@@ -25,6 +26,14 @@ const AddModels = () => {
       .then((res) => res.json())
       .then((data) => {
         console.log(data);
+
+        Swal.fire({
+          position: "top-end",
+          icon: "success",
+          title: "Successfully Added",
+          showConfirmButton: false,
+          timer: 1500,
+        });
       })
       .catch((err) => {
         console.log(err);

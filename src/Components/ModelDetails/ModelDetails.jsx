@@ -1,9 +1,97 @@
-import React from "react";
-import { Link, useLoaderData } from "react-router";
+import React, { use, useEffect, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router";
+import Swal from "sweetalert2";
+import { AuthContext } from "../../Context/AuthContext";
+import toast from "react-hot-toast";
 
 const ModelDetails = () => {
-  const data = useLoaderData();
-  const model = data.result;
+  // const data = useLoaderData()
+  // const model = data.result
+  const navigate = useNavigate();
+
+  const { id } = useParams();
+
+  const [model, setModel] = useState({});
+  const [loading, setLoading] = useState(true);
+
+  const { user } = use(AuthContext);
+
+  const [refetch, setRefetch] = useState(false);
+
+  useEffect(() => {
+    fetch(`https://3d-models-server-chi.vercel.app/models/${id}`, {
+      headers: {
+        authorization: `Bearer ${user.accessToken}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+        setModel(data.result);
+        setLoading(false);
+      });
+  }, [user, id, refetch]);
+
+  const handleDelete = () => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch(`https://3d-models-server-chi.vercel.app/models/${model._id}`, {
+          method: "DELETE",
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            navigate(-1);
+            console.log(data);
+            Swal.fire({
+              title: "Deleted!",
+              text: "Your file has been deleted.",
+              icon: "success",
+            });
+          });
+      }
+    });
+  };
+
+  const handleDownload = () => {
+    const finalModel = {
+      name: model.name,
+      downloads: model.downloads,
+      created_by: model.created_by,
+      description: model.description,
+      thumbnail: model.thumbnail,
+      created_at: new Date(),
+      downloaded_by: user.email,
+    };
+    fetch(`https://3d-models-server-chi.vercel.app/downloads/${model._id}`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(finalModel),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+        toast.success("successfully downloaded");
+        setRefetch(!refetch);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  if (loading) {
+    return <div>Loading....</div>;
+  }
+
   return (
     <div>
       <h3 className="text-center font-semibold text-3xl p-5">Model Details</h3>
@@ -44,10 +132,16 @@ const ModelDetails = () => {
                 >
                   Update Model
                 </Link>
-                <button className="btn btn-secondary rounded-full">
+                <button
+                  onClick={handleDownload}
+                  className="btn btn-secondary rounded-full"
+                >
                   Download
                 </button>
-                <button className="btn btn-outline rounded-full border-gray-300 hover:border-pink-500 hover:text-pink-600">
+                <button
+                  onClick={handleDelete}
+                  className="btn btn-outline rounded-full border-gray-300 hover:border-pink-500 hover:text-pink-600"
+                >
                   Delete
                 </button>
               </div>
